@@ -11,6 +11,7 @@
 #include <chia/chia.h>
 #include <chia/entries.h>
 #include <chia/DiskSort.h>
+#include <chia/RamSort.h>
 #include <chia/util.hpp>
 
 #include <array>
@@ -207,6 +208,14 @@ typedef DiskSort<entry_4, get_y<entry_4>> DiskSort4;
 typedef DiskSort<entry_5, get_y<entry_5>> DiskSort5;
 typedef DiskSort<entry_6, get_y<entry_6>> DiskSort6;
 typedef DiskSort<entry_7, get_y<entry_7>> DiskSort7;
+
+typedef RamSort<entry_1, get_y<entry_1>> RamSort1;
+typedef RamSort<entry_2, get_y<entry_2>> RamSort2;
+typedef RamSort<entry_3, get_y<entry_3>> RamSort3;
+typedef RamSort<entry_4, get_y<entry_4>> RamSort4;
+typedef RamSort<entry_5, get_y<entry_5>> RamSort5;
+typedef RamSort<entry_6, get_y<entry_6>> RamSort6;
+typedef RamSort<entry_7, get_y<entry_7>> RamSort7;
 
 struct output_t {
 	input_t params;

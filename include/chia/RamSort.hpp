@@ -120,7 +120,7 @@ void RamSort<T, Key>::write(size_t index, const void* data, size_t count)
 }
 
 template<typename T, typename Key>
-std::shared_ptr<typename DiskSort<T, Key>::WriteCache> DiskSort<T, Key>::add_cache()
+std::shared_ptr<typename RamSort<T, Key>::WriteCache> RamSort<T, Key>::add_cache()
 {
 	return std::make_shared<WriteCache>(this, bucket_key_shift, buckets.size());
 }
