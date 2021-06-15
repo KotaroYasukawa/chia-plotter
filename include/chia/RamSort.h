@@ -15,6 +15,7 @@
 #include <string>
 #include <cstdio>
 #include <cstddef>
+#include <cstdlib>
 #include <memory>
 #include <functional>
 
@@ -22,14 +23,22 @@
 template<typename T, typename Key>
 class RamSort {
 private:
+	struct free_deleter
+	{
+		void operator()(void* p) const { std::free(p); }
+	};
 	struct bucket_t {
-		std::vector<uint8_t> data;
+		std::unique_ptr<uint8_t, free_deleter> data;
 		std::mutex mutex;
 		std::string file_name;
 		size_t num_entries = 0;
 		
 		void write(const void* data, size_t count);
 		void remove();
+		void resize(const size_t newSize);
+		~bucket_t(){
+			remove();
+		}
 	};
 	
 public:

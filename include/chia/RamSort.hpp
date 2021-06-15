@@ -19,16 +19,31 @@ template<typename T, typename Key>
 void RamSort<T, Key>::bucket_t::write(const void* data_, size_t count)
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	const auto back = data.size();
-	data.resize(back+count*T::disk_size); //this is not effective but faster than push_back
-	memcpy(data.data()+back, data_, count*T::disk_size);
+	const auto last_size = num_entries;
+	resize(last_size*T::disk_size+count*T::disk_size);
+	memcpy(data.get()+last_size*T::disk_size, data_, count*T::disk_size);
 	num_entries += count;
 }
 
 template<typename T, typename Key>
 void RamSort<T, Key>::bucket_t::remove()
 {
-	data.clear();
+	data.reset();
+}
+
+template<typename T, typename Key>
+void RamSort<T, Key>::bucket_t::resize(const size_t newSize)
+{
+	if(newSize==0){
+		data.reset();
+	}else{
+		uint8_t* new_ptr = static_cast<uint8_t*>(std::realloc(data.get(), newSize));
+		if(!new_ptr){
+			throw std::bad_alloc();
+		}
+		data.release();
+		data.reset(new_ptr);
+	}
 }
 
 template<typename T, typename Key>
@@ -79,6 +94,7 @@ RamSort<T, Key>::RamSort(	int key_size, int log_num_buckets,
 	for(size_t i = 0; i < buckets.size(); ++i) {
 		auto& bucket = buckets[i];
 		bucket.file_name = file_prefix + ".sort_bucket_" + std::to_string(i) + ".tmp"; // necessary?
+		bucket.resize(0);
 		if(read_only) {
 			throw std::runtime_error("RamSort can't use as readonly");
 		}
@@ -163,7 +179,7 @@ void RamSort<T, Key>::read_bucket(	std::pair<size_t, size_t>& index,
 	std::unordered_map<size_t, std::vector<T>> table;
 	table.reserve(size_t(1) << log_num_buckets);
 
-	const uint8_t* ptr = bucket.data.data();
+	const uint8_t* ptr = bucket.data.get();
 	
 	for(size_t i = 0; i < bucket.num_entries; ++i)
 	{
